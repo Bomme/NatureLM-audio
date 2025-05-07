@@ -37,7 +37,7 @@ dependencies = [
   "tqdm>=4.66.4",
   "wandb>=0.17.3",
   "click>=8.1.7",
-  "beans-zero",
+  "beans-zero @ git+https://github.com/earthspecies/beans-zero.git@v1.0.0",
 ]
 
 [project.urls]
