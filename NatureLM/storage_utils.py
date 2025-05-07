@@ -30,5 +30,7 @@ class GSPath(cloudpathlib.GSPath):
     For more details, see: https://github.com/drivendataorg/cloudpathlib/issues/390
     """
 
-    def __init__(self, client_path, client=_get_client()):
+    def __init__(self, client_path, client=None):
+        if client is None:
+            client = _get_client()
         super().__init__(client_path, client=client)
