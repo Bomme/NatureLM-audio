@@ -21,7 +21,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from huggingface_hub import PyTorchModelHubMixin
-from peft import LoraConfig, TaskType, get_peft_model
 from torch.nn import CrossEntropyLoss
 from torch.nn.utils.rnn import pad_sequence
 from transformers import AutoModelForCausalLM, AutoTokenizer, StoppingCriteriaList
@@ -76,7 +75,7 @@ class NatureLM(nn.Module, PyTorchModelHubMixin):
         self.second_per_window = second_per_window
         self.second_stride = second_stride
         self.downsample_factor = downsample_factor
-        self.lora = lora
+        self.lora = False
         self.max_txt_len = max_txt_len
         self.end_sym = end_sym
         self.prompt_template = prompt_template
@@ -113,21 +112,6 @@ class NatureLM(nn.Module, PyTorchModelHubMixin):
                 param.requires_grad = False
         logging.info("Loading LLaMA Done")
         self.llama_embed_tokens = self.llama_model.model.embed_tokens
-
-        if self.lora:
-            logging.info("Setting up LoRA for llama model")
-            self.peft_config = LoraConfig(
-                task_type=TaskType.CAUSAL_LM,
-                inference_mode=False,
-                r=lora_rank,
-                lora_alpha=lora_alpha,
-                lora_dropout=lora_dropout,
-                target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
-            )
-            self.llama_model = get_peft_model(self.llama_model, self.peft_config)
-            self.llama_embed_tokens = self.llama_model.model.model.embed_tokens
-            self.llama_model.print_trainable_parameters()
-            logging.info("LoRA Training")
 
         logging.info("Loading BEATs Model")
         self.beats = BEATs(cfg=BEATsConfig(dict(self.beats_cfg)))
